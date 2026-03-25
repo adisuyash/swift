@@ -12,14 +12,14 @@ const API_BASE_URL = env.VITE_CKBULL_API_URL || "https://api.ckbull.com";
 const API_KEY = env.VITE_CKBULL_API_KEY || "";
 const API_SECRET = env.VITE_CKBULL_API_SECRET || "";
 
-async function hmacSha256(message: string, secret: string): Promise<string> {
+async function hmacSha512(message: string, secret: string): Promise<string> {
   if (
     typeof window === "undefined" ||
     !window.crypto ||
     !window.crypto.subtle
   ) {
     throw new Error(
-      "HMAC/SHA256 requires browser crypto.subtle in this environment",
+      "HMAC/SHA512 requires browser crypto.subtle in this environment",
     );
   }
   const enc = new TextEncoder();
@@ -27,7 +27,7 @@ async function hmacSha256(message: string, secret: string): Promise<string> {
   const cryptoKey = await window.crypto.subtle.importKey(
     "raw",
     keyData,
-    { name: "HMAC", hash: "SHA-256" },
+    { name: "HMAC", hash: "SHA-512" },
     false,
     ["sign"],
   );
@@ -51,7 +51,7 @@ function getApiKeyHeaders(
   // If their signing format differs, adapt it.
   const stringToSign = `${ts}.${method.toUpperCase()}.${path}.${bodyText}`;
 
-  return hmacSha256(stringToSign, API_SECRET).then((signature) => {
+  return hmacSha512(stringToSign, API_SECRET).then((signature) => {
     const headers = new Headers({
       "Content-Type": "application/json",
       "x-api-key": API_KEY,
