@@ -11,6 +11,16 @@ Swift turns invoices into instant crypto payments on the CKB blockchain. Create 
 - **CKB Integration**: Built on CKB Pudge testnet
 - **Transaction Tracking**: Live explorer integration
 
+## Screenshots
+- Landing Page
+<img width="1920" height="1080" alt="Landing Page" src="https://github.com/user-attachments/assets/f56b6c34-e394-4fa0-bc8f-900796f0efaa" />
+
+- QR Generated
+<img width="1920" height="1080" alt="QR Generated" src="https://github.com/user-attachments/assets/6a4241fa-eb23-400f-83e1-6ccb8d5a660a" />
+
+- How to use QR
+<img width="1920" height="1080" alt="How to use QR" src="https://github.com/user-attachments/assets/9976da23-a64d-488e-895d-56c2fc163a1d" />
+
 ## Tech Stack
 
 - **Frontend**: React + Vite + TypeScript + TailwindCSS
