@@ -1,83 +1,95 @@
-# Swift - Invoice to Instant Payments
+# Swift
 
-Swift turns invoices into instant crypto payments on the CKB blockchain. Create an invoice, generate a QR code, and get paid in one tap.
+> Swift turns invoices into instant payments.
+
+An AI agent validates the invoice, builds the transaction and generates a QR - the client scans, verifies and pays in one tap.
+
+No addresses. No errors. Just scan and pay!
 
 ## Features
 
 - **Invoice Creation**: Simple form to create freelancer invoices
 - **AI Validation**: Smart validation of invoice data
 - **QR Code Generation**: Instant QR code for payment
-- **QR Scanning**: Camera-based or manual QR input
+- **QR Scanning**: Camera-based, or manually paste link as a fallback
 - **CKB Integration**: Built on CKB Pudge testnet
 - **Transaction Tracking**: Live explorer integration
 
-## Screenshots
-- Landing Page
-<img width="1920" height="1080" alt="Landing Page" src="https://github.com/user-attachments/assets/f56b6c34-e394-4fa0-bc8f-900796f0efaa" />
-
-- QR Generated
-<img width="1920" height="1080" alt="QR Generated" src="https://github.com/user-attachments/assets/6a4241fa-eb23-400f-83e1-6ccb8d5a660a" />
-
-- How to use QR
-<img width="1920" height="1080" alt="How to use QR" src="https://github.com/user-attachments/assets/9976da23-a64d-488e-895d-56c2fc163a1d" />
-
 ## Tech Stack
 
-- **Frontend**: React + Vite + TypeScript + TailwindCSS
-- **Backend**: Vercel Serverless Functions
-- **Blockchain**: CKB with @ckb-ccc/core
-- **QR**: qrcode generation + html5-qrcode scanning
+- **Frontend**: React 19 + Vite 6 + TailwindCSS 3
+- **CCC Core & Connector**: @ckb-ccc/core + @ckb-ccc/connector-react
+- **QR**: qrcode + html5-qrcode
 
-## Getting Started
+## Installation & Usage
 
 ### Prerequisites
 
 - Node.js 18+
-- npm or pnpm
+- npm
 
-### Installation
+### Setup Instructions
 
-1. Clone and navigate to the project:
-```bash
-cd swift
-```
+1. Install dependencies:
 
-2. Install dependencies:
 ```bash
 npm install
 ```
 
-3. Start development server:
+2. Create your local env file:
+
+```bash
+cp .env.example .env
+```
+
+3. Set the environment variables:
+
+```bash
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+VITE_APP_URL=http://localhost:5173
+```
+
+4. Start the app:
+
 ```bash
 npm run dev
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000)
+6. Open:
 
-### Environment Variables
-
-Create a `.env.local` file:
-
-```env
-CKB_RPC_URL=https://testnet.ckb.dev
-CKB_EXPLORER_URL=https://testnet.explorer.nervos.org
+```text
+http://localhost:5173
 ```
 
 ## Project Structure
 
-```
+```text
 swift/
+├── index.html
+├── package.json
+├── vercel.json
 ├── src/
-│   ├── components/          # Reusable UI components
-│   ├── pages/             # Main application pages
-│   ├── hooks/             # Custom React hooks
-│   ├── services/          # API and blockchain services
-│   ├── types/             # TypeScript definitions
-│   ├── utils/             # Helper functions
-│   └── stores/            # Zustand stores
-├── api/                   # Vercel serverless functions
-├── public/                # Static assets
-└── docs/                  # Documentation
+│   ├── App.jsx
+│   ├── main.jsx
+│   ├── index.css
+│   ├── lib/
+│   │   └── supabase.js
+│   ├── utils/
+│   │   └── validateInvoice.js
+│   ├── ckb/
+│   │   └── transaction.js
+│   └── components/
+│       ├── Landing.jsx
+│       ├── RoleSelection.jsx
+│       ├── FreelancerDashboard.jsx
+│       ├── InvoiceForm.jsx
+│       ├── QRDisplay.jsx
+│       ├── ClientDashboard.jsx
+│       ├── QRScanner.jsx
+│       ├── InvoiceApproval.jsx
+│       └── Confirmation.jsx
+└── .env.example
 ```
 
 ## How It Works
@@ -90,28 +102,28 @@ swift/
 6. **Payment** is approved, signed, and broadcast to CKB testnet
 7. **Confirmation** shows transaction hash and explorer link
 
-## CKB Testnet
+## Payment Model
 
-- **RPC**: `https://testnet.ckb.dev`
-- **Explorer**: [https://testnet.explorer.nervos.org](https://testnet.explorer.nervos.org)
-- **Faucet**: [https://faucet.nervos.org](https://faucet.nervos.org)
+- The **invoice amount** is the amount sent to the freelancer.
+- The **network fee** is paid separately by the client wallet.
+- The app does **not** add network fee into the invoice total.
 
-## Deployment
+## Screenshots
 
-Deploy to Vercel:
+- Landing Page
+  <img width="1920" height="1080" alt="Landing Page" src="https://github.com/user-attachments/assets/f56b6c34-e394-4fa0-bc8f-900796f0efaa" />
 
-```bash
-npm run build
-vercel
-```
+- QR Generated
+  <img width="1920" height="1080" alt="QR Generated" src="https://github.com/user-attachments/assets/6a4241fa-eb23-400f-83e1-6ccb8d5a660a" />
 
-## Contributing
+- How to use QR
+  <img width="1920" height="1080" alt="How to use QR" src="https://github.com/user-attachments/assets/9976da23-a64d-488e-895d-56c2fc163a1d" />
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+## Useful Links
 
-## License
+- Faucet: https://faucet.nervos.org
+- Explorer: https://testnet.explorer.nervos.org
 
-MIT License - see LICENSE file for details
+---
+
+Note: This project is built on the CKB Pudge testnet, so all transactions are for testing purposes only.
