@@ -82,12 +82,13 @@ export function InvoiceForm() {
 
       // Initialize CKB service and set wallet address
       const ckbService = new CkbService();
-
-      // Store the signer address for transaction building
       ckbService.setSigner(signer);
 
-      // Generate QR code
-      const qrImage = await QrService.generateQRCode(invoice);
+      // Build transaction skeleton for QR
+      const txJson = await ckbService.buildPaymentTransactionSkeleton(invoice);
+
+      // Generate QR code with transaction JSON
+      const qrImage = await QrService.generateQRCode(txJson);
 
       // Update store and state
       setCurrentInvoice(invoice);

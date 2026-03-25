@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { QrService } from "../services/qr";
 import { CkbService } from "../services/ckb";
+import { CkbullService } from "../services/ckbull";
 import { useInvoiceStore } from "../stores/invoiceStore";
 import { useCccSigner } from "../providers/CccProvider";
 import { Html5QrcodeScanner } from "html5-qrcode";
@@ -82,9 +83,12 @@ export function PaymentScanner() {
       const ckbService = new CkbService();
       ckbService.setSigner(signer);
 
+      // Determine invoice object (legacy or QRData shape)
+      const targetInvoice = parsedInvoice.invoice || parsedInvoice;
+
       // Build payment transaction
       const unsignedTx =
-        await ckbService.buildPaymentTransaction(parsedInvoice);
+        await ckbService.buildPaymentTransaction(targetInvoice);
 
       // Sign and broadcast transaction
       const result = await ckbService.signAndBroadcast(unsignedTx);
@@ -95,6 +99,31 @@ export function PaymentScanner() {
     } catch (error) {
       console.error("Error approving payment:", error);
       setScanError("Failed to process payment. Please try again.");
+    } finally {
+      setIsApproving(false);
+      setLoading(false);
+    }
+  };
+
+  const handleApproveWithCkbull = async () => {
+    if (!parsedInvoice) {
+      setScanError("No invoice to pay");
+      return;
+    }
+
+    setIsApproving(true);
+    setLoading(true);
+    setError(null);
+
+    try {
+      const targetInvoice = parsedInvoice.invoice || parsedInvoice;
+      const ckbullService = new CkbullService();
+      const result = await ckbullService.payUsingCkbull(targetInvoice);
+      setTransactionResult(result);
+      navigate("/confirmation");
+    } catch (error) {
+      console.error("Error with CKBull payment:", error);
+      setScanError("CKBull payment failed. Please check wallet and try again.");
     } finally {
       setIsApproving(false);
       setLoading(false);
@@ -297,16 +326,28 @@ export function PaymentScanner() {
               </div>
             )}
 
-            <div className="flex space-x-4">
-              <button onClick={handleReset} className="btn-secondary flex-1">
-                Scan Different Invoice
-              </button>
+            <div className="flex flex-col gap-3">
+              <div className="grid grid-cols-2 gap-3">
+                <button onClick={handleReset} className="btn-secondary">
+                  Scan Different Invoice
+                </button>
+                <button
+                  onClick={handleApprovePayment}
+                  disabled={isApproving || !signer}
+                  className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isApproving ? "Processing Payment..." : "Approve & Pay"}
+                </button>
+              </div>
+
               <button
-                onClick={handleApprovePayment}
-                disabled={isApproving || !signer}
-                className="btn-primary flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handleApproveWithCkbull}
+                disabled={isApproving}
+                className="btn-accent w-full disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isApproving ? "Processing Payment..." : "Approve & Pay"}
+                {isApproving
+                  ? "Processing with CKBull..."
+                  : "Pay with CKBull Signer"}
               </button>
             </div>
           </div>

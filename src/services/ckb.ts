@@ -1,4 +1,4 @@
-import { Invoice, QRData, TransactionResult } from "../types";
+import { Invoice, TransactionResult } from "../types";
 
 export class CkbService {
   private client: any = null;
@@ -25,36 +25,38 @@ export class CkbService {
     return "0x" + hex;
   }
 
-  async buildPaymentTransaction(invoice: Invoice): Promise<string> {
-    if (!this.signer) {
-      throw new Error("No signer available");
-    }
-
+  async buildPaymentTransactionSkeleton(invoice: Invoice): Promise<string> {
     try {
-      // Create a simple transaction structure to pay the invoice
-      // The signer will handle adding inputs and signing
-      const tx = {
-        version: "0x0",
+      // Create a Lumos TransactionSkeleton compatible with CKBull/Peersyst SDK
+      const skeleton = {
+        cellProvider: null,
         cellDeps: [],
         headerDeps: [],
-        inputs: [], // Signer will populate this
+        inputs: [], // Wallet will populate this
         outputs: [
           {
-            lock: {
-              codeHash:
-                "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-              hashType: "type",
-              args: invoice.ckbAddress,
+            cellOutput: {
+              lock: {
+                codeHash:
+                  "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                hashType: "type",
+                args: invoice.ckbAddress,
+              },
+              type: null,
+              capacity: `0x${Math.floor(invoice.amount * 100000000).toString(16)}`, // Convert CKB to shannons
             },
-            type: null,
-            capacity: `0x${Math.floor(invoice.amount * 100000000).toString(16)}`, // Convert CKB to shannons
+            data: "0x",
+            outPoint: null,
+            blockHash: null,
           },
         ],
-        outputsData: ["0x"],
         witnesses: [],
+        fixedEntries: [],
+        signingEntries: [],
+        inputSinces: {},
       };
 
-      // Add invoice metadata to outputsData
+      // Add invoice metadata to output data
       const invoiceData = JSON.stringify({
         invoiceId: invoice.id,
         freelancerName: invoice.freelancerName,
@@ -62,13 +64,17 @@ export class CkbService {
         createdAt: invoice.createdAt.toISOString(),
       });
 
-      tx.outputsData[0] = this.stringToHex(invoiceData);
+      skeleton.outputs[0].data = this.stringToHex(invoiceData);
 
-      return JSON.stringify(tx);
+      return JSON.stringify(skeleton);
     } catch (error) {
-      console.error("Error building payment transaction:", error);
-      throw new Error("Failed to build payment transaction");
+      console.error("Error building payment transaction skeleton:", error);
+      throw new Error("Failed to build payment transaction skeleton");
     }
+  }
+
+  async buildPaymentTransaction(invoice: Invoice): Promise<string> {
+    return this.buildPaymentTransactionSkeleton(invoice);
   }
 
   async signAndBroadcast(unsignedTx: string): Promise<TransactionResult> {
